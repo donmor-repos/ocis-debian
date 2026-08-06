@@ -1,3 +1,11 @@
+ocis (8.0.6-1) unstable; urgency=medium
+
+  * Security - Upgrade libvips to 8.18.4: #12596
+  * Security - Upgrade Go to 1.25.12: #12602
+  * Enhancement - Allow disabling the last sign-in timestamp update: #12522
+
+ -- donmor <donmor3000@hotmail.com>  Thu, 06 Aug 2026 14:48:02 +0800
+
 ocis (8.1.0-1) unstable; urgency=medium
 
   * Security - Add X-XSS-Protection header: #12092

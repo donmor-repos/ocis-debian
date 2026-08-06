@@ -30,7 +30,7 @@ jobs:
           mv .github/workflows /tmp
           /tmp/workflows/.extras.sh
           tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
-          dpkg-buildpackage -us -uc -Zgzip -d
+          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d
       - uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
@@ -69,7 +69,7 @@ jobs:
           mv .github/workflows /tmp
           /tmp/workflows/.extras.sh
           tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
-          dpkg-buildpackage -us -uc -Zgzip -d
+          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d
       - uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
@@ -105,7 +105,7 @@ jobs:
  #          /tmp/workflows/.extras.sh
  #          sudo apt-get install binutils-i686-linux-gnu i686-linux-gnu-gcc
  #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -us -uc -Zgzip -d -a i386
+ #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a i386
  #      - uses: softprops/action-gh-release@v2
  #        if: github.ref_type == 'tag'
  #        with:
@@ -142,7 +142,7 @@ jobs:
  #          /tmp/workflows/.extras.sh
  #          sudo apt-get install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf
  #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -us -uc -Zgzip -d -a armhf
+ #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a armhf
  #      - uses: softprops/action-gh-release@v2
  #        if: github.ref_type == 'tag'
  #        with:
@@ -179,7 +179,7 @@ jobs:
  #         /tmp/workflows/.extras.sh
  #         sudo apt-get install binutils-arm-linux-gnueabi gcc-arm-linux-gnueabi
  #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -us -uc -Zgzip -d -a armel
+ #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a armel
  #     - uses: softprops/action-gh-release@v2
  #       if: github.ref_type == 'tag'
  #       with:
@@ -215,7 +215,7 @@ jobs:
  #         /tmp/workflows/.extras.sh
  #         sudo apt-get install binutils-loongarch64-linux-gnu gcc-loongarch64-linux-gnu
  #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -us -uc -Zgzip -d -a loong64
+ #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a loong64
  #     - uses: softprops/action-gh-release@v2
  #       if: github.ref_type == 'tag'
  #       with:
@@ -252,7 +252,7 @@ jobs:
  #         /tmp/workflows/.extras.sh
  #         sudo apt-get install binutils-mips64el-linux-gnuabi64 gcc-mips64el-linux-gnuabi64
  #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -us -uc -Zgzip -d -a mips64el
+ #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a mips64el
  #     - uses: softprops/action-gh-release@v2
  #       if: github.ref_type == 'tag'
  #       with:
@@ -289,7 +289,7 @@ jobs:
  #         /tmp/workflows/.extras.sh
  #         sudo apt-get install binutils-mipsel-linux-gnu gcc-mipsel-linux-gnu
  #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -us -uc -Zgzip -d -a mipsel
+ #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a mipsel
  #     - uses: softprops/action-gh-release@v2
  #       if: github.ref_type == 'tag'
  #       with:
@@ -325,7 +325,7 @@ jobs:
  #          /tmp/workflows/.extras.sh
  #          sudo apt-get install binutils-powerpc64le-linux-gnu gcc-powerpc64le-linux-gnu
  #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -us -uc -Zgzip -d -a ppc64el
+ #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a ppc64el
  #      - uses: softprops/action-gh-release@v2
  #        if: github.ref_type == 'tag'
  #        with:
@@ -362,7 +362,7 @@ jobs:
  #         /tmp/workflows/.extras.sh
  #         sudo apt-get install binutils-powerpc64-linux-gnu gcc-powerpc64-linux-gnu
  #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -us -uc -Zgzip -d -a ppc64
+ #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a ppc64
  #     - uses: softprops/action-gh-release@v2
  #       if: github.ref_type == 'tag'
  #       with:
@@ -398,7 +398,7 @@ jobs:
  #          /tmp/workflows/.extras.sh
  #          sudo apt-get install binutils-riscv64-linux-gnu gcc-riscv64-linux-gnu
  #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -us -uc -Zgzip -d -a riscv64
+ #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a riscv64
  #      - uses: softprops/action-gh-release@v2
  #        if: github.ref_type == 'tag'
  #        with:
@@ -434,7 +434,7 @@ jobs:
  #          /tmp/workflows/.extras.sh
  #          sudo apt-get install binutils-s390x-linux-gnu gcc-s390x-linux-gnu
  #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -us -uc -Zgzip -d -a s390x
+ #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a s390x
  #      - uses: softprops/action-gh-release@v2
  #        if: github.ref_type == 'tag'
  #        with:

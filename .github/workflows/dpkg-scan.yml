@@ -41,10 +41,12 @@ jobs:
           dpkg-scanpackages -t ddeb -m ../../download/${{ github.event.workflow_run.head_branch }} >> Packages
           dpkg-scansources ../../download/${{ github.event.workflow_run.head_branch }} >> Sources
           apt-ftparchive release . > Release
+          echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
+          gpg --batch --yes --clearsign --local-user ${{ secrets.GPG_KEY_FINGERPRINT }} --output InRelease Release
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.workflow_run.head_branch }}
           files: |
             download/${{ github.event.workflow_run.head_branch }}/Packages
             download/${{ github.event.workflow_run.head_branch }}/Sources
-            download/${{ github.event.workflow_run.head_branch }}/Release
+            download/${{ github.event.workflow_run.head_branch }}/InRelease
