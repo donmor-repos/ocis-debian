@@ -2,420 +2,229 @@ name: Debian Build Bot
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        required: true
 
 jobs:
-  build_amd64:
-    name: Build amd64 packages
+  version:
+    name: Get versions
+    runs-on: ubuntu-latest
+    outputs:
+      ocis: ${{ steps.version.outputs.ocis }}
+      ref: ${{ steps.version.outputs.ref }}
+      time: ${{ steps.version.outputs.time }}
+      date: ${{ steps.version.outputs.date }}
+    steps:
+      - id: version
+        run: |
+          if [ -n "${{ github.event.inputs.ref }}" ]; then
+            TAG=${{ github.event.inputs.ref }}
+          else
+            TAG=${{ github.ref_name }}
+          fi
+          DATE=`curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/owncloud/ocis/releases/tags/${TAG}" | jq -r ".created_at"`
+          echo "ocis=${TAG#v}" >> $GITHUB_OUTPUT
+          echo "ref=${TAG}" >> $GITHUB_OUTPUT
+          date -d "${DATE}" +time=%Y%m%d >> $GITHUB_OUTPUT
+          date -d "${DATE}" +date=%s >> $GITHUB_OUTPUT
+  build:
+    name: Build ${{ matrix.config.d_arch }} packages
+    runs-on: ${{ matrix.config.host }}
+    strategy:
+      matrix:
+        config:
+          - d_arch: amd64
+            c_arch: x86_64-linux-gnu
+            h_arch: amd64
+            go_arch: amd64
+            go_host_arch: amd64
+            host: ubuntu-24.04
+          - d_arch: arm64
+            c_arch: aarch64-linux-gnu
+            h_arch: arm64
+            go_arch: arm64
+            go_host_arch: arm64
+            host: ubuntu-24.04-arm
+          - d_arch: i386
+            c_arch: i686-linux-gnu
+            h_arch: amd64
+            go_arch: 386
+            go_host_arch: amd64
+            host: ubuntu-24.04
+          - d_arch: armhf
+            c_arch: arm-linux-gnueabihf
+            h_arch: arm64
+            go_arch: arm
+            go_host_arch: arm64
+            go_arm: 7
+            host: ubuntu-24.04-arm
+          - d_arch: armel
+            c_arch: arm-linux-gnueabi
+            h_arch: arm64
+            go_arch: arm
+            go_host_arch: arm64
+            go_arm: 5
+            host: ubuntu-24.04-arm
+          - d_arch: loong64
+            c_arch: loongarch64-linux-gnu
+            h_arch: arm64
+            go_arch: loong64
+            go_host_arch: arm64
+            host: ubuntu-26.04-arm
+          - d_arch: ppc64el
+            c_arch: powerpc64le-linux-gnu
+            h_arch: arm64
+            go_arch: ppc64le
+            go_host_arch: arm64
+            host: ubuntu-24.04-arm
+          - d_arch: riscv64
+            c_arch: riscv64-linux-gnu
+            h_arch: arm64
+            go_arch: riscv64
+            go_host_arch: arm64
+            host: ubuntu-24.04-arm
+          - d_arch: s390x
+            c_arch: s390x-linux-gnu
+            h_arch: arm64
+            go_arch: s390x
+            go_host_arch: arm64
+            host: ubuntu-24.04-arm
+    needs: version
+    steps:
+      # - name: Get build scripts
+      #   uses: actions/checkout@v7
+      #   with:
+      #     path: ocis-${{ needs.version.outputs.ocis }}
+      # - name: Get source
+      #   id: src
+      #   uses: robinraju/release-downloader@v1
+      #   with:
+      #     repository: 'owncloud/ocis'
+      #     tag: ${{ needs.version.outputs.ref }}
+      #     tarBall: true
+      - name: Prepare source and build scripts
+        run: |
+          curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -o ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz \
+              https://github.com/owncloud/ocis/archive/refs/tags/${{ needs.version.outputs.ref }}.tar.gz
+          tar xvf ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz
+          curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -o ocis-debian-${{ github.ref_name }}.tar.gz \
+              https://github.com/${{ github.repository }}/archive/${{ github.ref }}.tar.gz
+          tar xvf ocis-debian-${{ github.ref_name }}.tar.gz --strip-components=1 -C ocis-${{ needs.version.outputs.ocis }} ocis-debian-${{ github.ref_name }}/debian
+      - name: Prepare and build
+        working-directory: ocis-${{ needs.version.outputs.ocis }}
+        env:
+          GOPROXY: "https://proxy.golang.org"
+          C_ARCH: ${{ matrix.config.c_arch }}
+          D_ARCH: ${{ matrix.config.d_arch }}
+          H_ARCH: ${{ matrix.config.h_arch }}
+          NODE_VERSION: 24.x
+          GOHOSTOS: linux
+          GOHOSTARCH: ${{ matrix.config.go_host_arch }}
+          GOOS: linux
+          GOARCH: ${{ matrix.config.go_arch }}
+          CGO_ENABLED: 1
+          DATE: ${{ needs.version.outputs.date }}
+          SOURCE_DATE_EPOCH: ${{ needs.version.outputs.time }}
+          VERSION: ${{ needs.version.outputs.ocis }}
+        run: |
+          tar xf ../ocis-debian-${{ github.ref_name }}.tar.gz ocis-debian-${{ github.ref_name }}/.github/workflows/.extras.sh -O | sh
+          if [ -n "${{ matrix.config.go_arm }}" ]; then export GOARM="${{ matrix.config.go_arm }}"; fi
+          dpkg-buildpackage -v${{ needs.version.outputs.ocis }}-1 -us -uc -Zgzip -a ${D_ARCH}
+        # run: |
+        #   mv -v ../ocis-${{ needs.version.outputs.ref }}.tar.gz ../ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz
+        #   tar xf ../ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz --strip-components=1 --wildcards '*/go.mod'
+        #   ./.github/workflows/.extras.sh
+        #   rm -rf .git .github .gitignore LICENSE README.md
+        #   tar xvf ../ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz --strip-components=1
+        #   if [ -n "${{ matrix.config.go_arm }}" ]; then export GOARM="${{ matrix.config.go_arm }}"; fi
+        #   dpkg-buildpackage -v${{ needs.version.outputs.ocis }}-1 -us -uc -Zgzip -d -a ${D_ARCH}
+      - name: Send built packages - src
+        uses: actions/upload-artifact@v7
+        if: matrix.config.d_arch == 'amd64'
+        with:
+          name: web
+          retention-days: 1
+          path: |
+            ocis-${{ needs.version.outputs.ocis }}/web/dist
+      - name: Send built packages - src
+        uses: actions/upload-artifact@v7
+        if: matrix.config.d_arch == 'amd64'
+        with:
+          name: src
+          retention-days: 1
+          path: |
+            ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz
+            ocis_${{ needs.version.outputs.ocis }}-1.debian.tar.gz
+            ocis_${{ needs.version.outputs.ocis }}-1.dsc
+      - name: Send built packages - all
+        uses: actions/upload-artifact@v7
+        if: matrix.config.d_arch == 'amd64'
+        with:
+          name: all
+          retention-days: 1
+          path: |
+            ocis-common_${{ needs.version.outputs.ocis }}-1_all.deb
+      - name: Send built packages - ${{ matrix.config.d_arch }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.config.d_arch }}
+          retention-days: 1
+          path: |
+            ocis_${{ needs.version.outputs.ocis }}-1_${{ matrix.config.d_arch }}.deb
+            ocis-dbgsym_${{ needs.version.outputs.ocis }}-1_${{ matrix.config.d_arch }}.ddeb
+  repository:
+    name: Generate Debian repository and upload all artifacts
+    needs: [version,build]
     runs-on: ubuntu-24.04
     steps:
-      - run: echo "Building with ${{ github.ref_name }}"
-      - run: |
-          TAG=${{ github.ref_name }}
-          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
+      - name: Checkout code to get previous tag
+        uses: actions/checkout@v7
         with:
-          path: ocis-${{ env.OCIS_VERSION }}
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: 'owncloud/ocis'
-          tag: ${{ github.ref_name }}
-          tarBall: true
-      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
-      - working-directory: ocis-${{ env.OCIS_VERSION }}
-        env:
-          GOPROXY: "https://proxy.golang.org"
-          GOARCH: 'amd64'
+          fetch-depth: '0'
+      - name: Get previous tag
+        id: previous
         run: |
-          tar xvf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1 --wildcards 'owncloud-ocis-???????/go.mod'
-          mv .github/workflows /tmp
-          /tmp/workflows/.extras.sh
-          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
-          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d
-      - uses: softprops/action-gh-release@v2
+          PREVIOUS_TAG=`git describe --abbrev=0 --tags ${{ needs.version.outputs.ref }}^`
+          echo "ref=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+      - name: Create target directory
+        run: mkdir -p download/${{ needs.version.outputs.ref }}
+      - name: Download previous Packages (if exists)
+        uses: robinraju/release-downloader@v1
+        continue-on-error: true
+        with:
+          tag: ${{ steps.previous.outputs.ref }}
+          out-file-path: download/${{ needs.version.outputs.ref }}
+          fileName: 'Packages'
+      - name: Download previous Sources (if exists)
+        uses: robinraju/release-downloader@v1
+        continue-on-error: true
+        with:
+          tag: ${{ steps.previous.outputs.ref }}
+          out-file-path: download/${{ needs.version.outputs.ref }}
+          fileName: 'Sources'
+      - name: Download artifacts from build jobs
+        uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+          path: download/${{ needs.version.outputs.ref }}
+      - name: Generate Packages, Sources, and InRelease
+        working-directory: download/${{ needs.version.outputs.ref }}
+        run: |
+          dpkg-scanpackages -m ../../download/${{ needs.version.outputs.ref }} | tee -a Packages
+          dpkg-scanpackages -t ddeb -m ../../download/${{ needs.version.outputs.ref }} | tee -a Packages
+          dpkg-scansources . | tee -a Sources
+          echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
+          apt-ftparchive release . | gpg --batch --yes --clearsign --local-user ${{ secrets.GPG_KEY_FINGERPRINT }} --output - | tee InRelease
+      - uses: actions/upload-artifact@v7
+        with:
+          name: repo
+          retention-days: 1
+          path: download/${{ needs.version.outputs.ref }}/**
+      - name: Upload all files to release
+        uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: |
-            ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
-            ocis_${{ env.OCIS_VERSION }}-1.debian.tar.gz
-            ocis_${{ env.OCIS_VERSION }}-1.dsc
-            ocis_${{ env.OCIS_VERSION }}-1_amd64.deb
-            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_amd64.ddeb
-            ocis-common_${{ env.OCIS_VERSION }}-1_all.deb
-  build_arm64:
-    name: Build arm64 packages
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - run: echo "Building with ${{ github.ref_name }}"
-      - run: |
-          TAG=${{ github.ref_name }}
-          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
-        with:
-          path: ocis-${{ env.OCIS_VERSION }}
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: 'owncloud/ocis'
-          tag: ${{ github.ref_name }}
-          tarBall: true
-      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
-      - working-directory: ocis-${{ env.OCIS_VERSION }}
-        env:
-          GOPROXY: "https://proxy.golang.org"
-          GOARCH: 'arm64'
-        run: |
-          tar xvf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1 --wildcards 'owncloud-ocis-???????/go.mod'
-          mv .github/workflows /tmp
-          /tmp/workflows/.extras.sh
-          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
-          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d
-      - uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
-        with:
-          files: |
-            ocis_${{ env.OCIS_VERSION }}-1_arm64.deb
-            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_arm64.ddeb
- #  build_i386:
- #    name: Build i386 packages
- #    runs-on: ubuntu-24.04
- #    steps:
- #      - run: echo "Building with ${{ github.ref_name }}"
- #      - run: |
- #          TAG=${{ github.ref_name }}
- #          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #      - uses: actions/checkout@v4
- #        with:
- #          path: ocis-${{ env.OCIS_VERSION }}
- #      - uses: robinraju/release-downloader@v1
- #        with:
- #          repository: 'owncloud/ocis'
- #          tag: ${{ github.ref_name }}
- #          tarBall: true
- #      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #      - working-directory: ocis-${{ env.OCIS_VERSION }}
- #        env:
- #          GOPROXY: "https://proxy.golang.org"
- #          GOARCH: '386'
- #          CGO_ENABLED: '1'
- #        run: |
- #          mv .github/workflows /tmp
- #          /tmp/workflows/.extras.sh
- #          sudo apt-get install binutils-i686-linux-gnu i686-linux-gnu-gcc
- #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a i386
- #      - uses: softprops/action-gh-release@v2
- #        if: github.ref_type == 'tag'
- #        with:
- #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_i386.deb
- #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_i386.deb
- #  build_armhf:
- #    name: Build armhf packages
- #    runs-on: ubuntu-24.04-arm
- #    steps:
- #      - run: echo "Building with ${{ github.ref_name }}"
- #      - run: |
- #          TAG=${{ github.ref_name }}
- #          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #      - uses: actions/checkout@v4
- #        with:
- #          path: ocis-${{ env.OCIS_VERSION }}
- #      - uses: robinraju/release-downloader@v1
- #        with:
- #          repository: 'owncloud/ocis'
- #          tag: ${{ github.ref_name }}
- #          tarBall: true
- #      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #      - working-directory: ocis-${{ env.OCIS_VERSION }}
- #        env:
- #          GOPROXY: "https://proxy.golang.org"
- #          GOARCH: 'arm'
- #          GOARM: '7'
- #          CGO_ENABLED: '1'
- #        run: |
- #          mv .github/workflows /tmp
- #          /tmp/workflows/.extras.sh
- #          sudo apt-get install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf
- #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a armhf
- #      - uses: softprops/action-gh-release@v2
- #        if: github.ref_type == 'tag'
- #        with:
- #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_armhf.deb
- #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_armhf.deb
- # build_armel: # lacking gcc
- #   name: Build armel packages
- #   runs-on: ubuntu-24.04-arm
- #   steps:
- #     - run: echo "Building with ${{ github.ref_name }}"
- #     - run: |
- #         TAG=${{ github.ref_name }}
- #         echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #     - uses: actions/checkout@v4
- #       with:
- #         path: ocis-${{ env.OCIS_VERSION }}
- #     - uses: robinraju/release-downloader@v1
- #       with:
- #         repository: 'owncloud/ocis'
- #         tag: ${{ github.ref_name }}
- #         tarBall: true
- #     - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #     - working-directory: ocis-${{ env.OCIS_VERSION }}
- #       env:
- #         GOPROXY: "https://proxy.golang.org"
- #         GOARCH: 'arm'
- #         GOARM: '5'
- #         CGO_ENABLED: '1'
- #       run: |
- #         mv .github/workflows /tmp
- #         /tmp/workflows/.extras.sh
- #         sudo apt-get install binutils-arm-linux-gnueabi gcc-arm-linux-gnueabi
- #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a armel
- #     - uses: softprops/action-gh-release@v2
- #       if: github.ref_type == 'tag'
- #       with:
- #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_armel.deb
- #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_armel.deb
- # build_loong64: # lacking gcc
- #   name: Build loong64 packages
- #   runs-on: ubuntu-24.04
- #   steps:
- #     - run: echo "Building with ${{ github.ref_name }}"
- #     - run: |
- #         TAG=${{ github.ref_name }}
- #         echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #     - uses: actions/checkout@v4
- #       with:
- #         path: ocis-${{ env.OCIS_VERSION }}
- #     - uses: robinraju/release-downloader@v1
- #       with:
- #         repository: 'owncloud/ocis'
- #         tag: ${{ github.ref_name }}
- #         tarBall: true
- #     - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #     - working-directory: ocis-${{ env.OCIS_VERSION }}
- #       env:
- #         GOPROXY: "https://proxy.golang.org"
- #         GOARCH: 'loong64'
- #         CGO_ENABLED: '1'
- #       run: |
- #         mv .github/workflows /tmp
- #         /tmp/workflows/.extras.sh
- #         sudo apt-get install binutils-loongarch64-linux-gnu gcc-loongarch64-linux-gnu
- #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a loong64
- #     - uses: softprops/action-gh-release@v2
- #       if: github.ref_type == 'tag'
- #       with:
- #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_loong64.deb
- #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_loong64.deb
- # build_mips64el: # lacking gcc
- #   name: Build mips64el packages
- #   runs-on: ubuntu-24.04
- #   steps:
- #     - run: echo "Building with ${{ github.ref_name }}"
- #     - run: |
- #         TAG=${{ github.ref_name }}
- #         echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #     - uses: actions/checkout@v4
- #       with:
- #         path: ocis-${{ env.OCIS_VERSION }}
- #     - uses: robinraju/release-downloader@v1
- #       with:
- #         repository: 'owncloud/ocis'
- #         tag: ${{ github.ref_name }}
- #         tarBall: true
- #     - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #     - working-directory: ocis-${{ env.OCIS_VERSION }}
- #       env:
- #         GOPROXY: "https://proxy.golang.org"
- #         GOARCH: 'mips64le'
- #         CGO_ENABLED: '1'
- #         GOFLAGS: '-trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw'
- #       run: |
- #         mv .github/workflows /tmp
- #         /tmp/workflows/.extras.sh
- #         sudo apt-get install binutils-mips64el-linux-gnuabi64 gcc-mips64el-linux-gnuabi64
- #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a mips64el
- #     - uses: softprops/action-gh-release@v2
- #       if: github.ref_type == 'tag'
- #       with:
- #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_mips64el.deb
- #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_mips64el.deb
- # build_mipsel: # lacking gcc
- #   name: Build mipsel packages
- #   runs-on: ubuntu-24.04
- #   steps:
- #     - run: echo "Building with ${{ github.ref_name }}"
- #     - run: |
- #         TAG=${{ github.ref_name }}
- #         echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #     - uses: actions/checkout@v4
- #       with:
- #         path: ocis-${{ env.OCIS_VERSION }}
- #     - uses: robinraju/release-downloader@v1
- #       with:
- #         repository: 'owncloud/ocis'
- #         tag: ${{ github.ref_name }}
- #         tarBall: true
- #     - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #     - working-directory: ocis-${{ env.OCIS_VERSION }}
- #       env:
- #         GOPROXY: "https://proxy.golang.org"
- #         GOARCH: 'mipsle'
- #         CGO_ENABLED: '1'
- #         GOFLAGS: '-trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw'
- #       run: |
- #         mv .github/workflows /tmp
- #         /tmp/workflows/.extras.sh
- #         sudo apt-get install binutils-mipsel-linux-gnu gcc-mipsel-linux-gnu
- #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a mipsel
- #     - uses: softprops/action-gh-release@v2
- #       if: github.ref_type == 'tag'
- #       with:
- #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_mipsel.deb
- #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_mipsel.deb
- #  build_ppc64el:
- #    name: Build ppc64el packages
- #    runs-on: ubuntu-24.04
- #    steps:
- #      - run: echo "Building with ${{ github.ref_name }}"
- #      - run: |
- #          TAG=${{ github.ref_name }}
- #          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #      - uses: actions/checkout@v4
- #        with:
- #          path: ocis-${{ env.OCIS_VERSION }}
- #      - uses: robinraju/release-downloader@v1
- #        with:
- #          repository: 'owncloud/ocis'
- #          tag: ${{ github.ref_name }}
- #          tarBall: true
- #      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #      - working-directory: ocis-${{ env.OCIS_VERSION }}
- #        env:
- #          GOPROXY: "https://proxy.golang.org"
- #          GOARCH: 'ppc64le'
- #          CGO_ENABLED: '1'
- #        run: |
- #          mv .github/workflows /tmp
- #          /tmp/workflows/.extras.sh
- #          sudo apt-get install binutils-powerpc64le-linux-gnu gcc-powerpc64le-linux-gnu
- #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a ppc64el
- #      - uses: softprops/action-gh-release@v2
- #        if: github.ref_type == 'tag'
- #        with:
- #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_ppc64el.deb
- #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_ppc64el.deb
- # build_ppc64: # lacking gcc
- #   name: Build ppc64 packages
- #   runs-on: ubuntu-24.04
- #   steps:
- #     - run: echo "Building with ${{ github.ref_name }}"
- #     - run: |
- #         TAG=${{ github.ref_name }}
- #         echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #     - uses: actions/checkout@v4
- #       with:
- #         path: ocis-${{ env.OCIS_VERSION }}
- #     - uses: robinraju/release-downloader@v1
- #       with:
- #         repository: 'owncloud/ocis'
- #         tag: ${{ github.ref_name }}
- #         tarBall: true
- #     - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #     - working-directory: ocis-${{ env.OCIS_VERSION }}
- #       env:
- #         GOPROXY: "https://proxy.golang.org"
- #         GOARCH: 'ppc64'
- #         CGO_ENABLED: '1'
- #         GOFLAGS: '-trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw'
- #       run: |
- #         mv .github/workflows /tmp
- #         /tmp/workflows/.extras.sh
- #         sudo apt-get install binutils-powerpc64-linux-gnu gcc-powerpc64-linux-gnu
- #         tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #         dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a ppc64
- #     - uses: softprops/action-gh-release@v2
- #       if: github.ref_type == 'tag'
- #       with:
- #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_ppc64.deb
- #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_ppc64.deb
- #  build_riscv64:
- #    name: Build riscv64 packages
- #    runs-on: ubuntu-24.04
- #    steps:
- #      - run: echo "Building with ${{ github.ref_name }}"
- #      - run: |
- #          TAG=${{ github.ref_name }}
- #          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #      - uses: actions/checkout@v4
- #        with:
- #          path: ocis-${{ env.OCIS_VERSION }}
- #      - uses: robinraju/release-downloader@v1
- #        with:
- #          repository: 'owncloud/ocis'
- #          tag: ${{ github.ref_name }}
- #          tarBall: true
- #      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #      - working-directory: ocis-${{ env.OCIS_VERSION }}
- #        env:
- #          GOPROXY: "https://proxy.golang.org"
- #          GOARCH: 'riscv64'
- #          CGO_ENABLED: '1'
- #        run: |
- #          mv .github/workflows /tmp
- #          /tmp/workflows/.extras.sh
- #          sudo apt-get install binutils-riscv64-linux-gnu gcc-riscv64-linux-gnu
- #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a riscv64
- #      - uses: softprops/action-gh-release@v2
- #        if: github.ref_type == 'tag'
- #        with:
- #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_riscv64.deb
- #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_riscv64.deb
- #  build_s390x:
- #    name: Build s390x packages
- #    runs-on: ubuntu-24.04
- #    steps:
- #      - run: echo "Building with ${{ github.ref_name }}"
- #      - run: |
- #          TAG=${{ github.ref_name }}
- #          echo "OCIS_VERSION=${TAG#v}" >> $GITHUB_ENV
- #      - uses: actions/checkout@v4
- #        with:
- #          path: ocis-${{ env.OCIS_VERSION }}
- #      - uses: robinraju/release-downloader@v1
- #        with:
- #          repository: 'owncloud/ocis'
- #          tag: ${{ github.ref_name }}
- #          tarBall: true
- #      - run: mv ocis-${{ github.ref_name }}.tar.gz ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
- #      - working-directory: ocis-${{ env.OCIS_VERSION }}
- #        env:
- #          GOPROXY: "https://proxy.golang.org"
- #          GOARCH: 's390x'
- #          CGO_ENABLED: '1'
- #        run: |
- #          mv .github/workflows /tmp
- #          /tmp/workflows/.extras.sh
- #          sudo apt-get install binutils-s390x-linux-gnu gcc-s390x-linux-gnu
- #          tar -xf ../ocis_${{ env.OCIS_VERSION }}.orig.tar.gz --strip-components=1
- #          dpkg-buildpackage -v${{ env.OCIS_VERSION }}-1 -us -uc -Zgzip -d -a s390x
- #      - uses: softprops/action-gh-release@v2
- #        if: github.ref_type == 'tag'
- #        with:
- #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_s390x.deb
- #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_s390x.deb
+          files: download/${{ needs.version.outputs.ref }}/**

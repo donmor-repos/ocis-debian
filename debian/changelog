@@ -1,3 +1,9 @@
+ocis (8.2.0-rc.1-1) unstable; urgency=medium
+
+  * pre
+
+ -- donmor <donmor3000@hotmail.com>  Sat, 08 Aug 2026 20:06:30 +0800
+
 ocis (8.0.7-1) unstable; urgency=medium
 
   * Bugfix - Return correct issuerAssignedId on /me: #12635
