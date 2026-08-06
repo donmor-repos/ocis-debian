@@ -1,3 +1,15 @@
+ocis (8.0.7-1) unstable; urgency=medium
+
+  * Bugfix - Return correct issuerAssignedId on /me: #12635
+  * Bugfix - Log unmapped thumbnail errors and always report a sabredav exception:
+    #12663
+  * Enhancement - Eliminate redundant LDAP read-after-write on create and update:
+    #12618
+  * Enhancement - Add an opt-in bounded LDAP connection pool: #12660
+  * Enhancement - Retry LDAP operations against a lagging replica: #12672
+
+ -- donmor <donmor3000@hotmail.com>  Thu, 06 Aug 2026 16:35:15 +0800
+
 ocis (8.0.6-1) unstable; urgency=medium
 
   * Security - Upgrade libvips to 8.18.4: #12596

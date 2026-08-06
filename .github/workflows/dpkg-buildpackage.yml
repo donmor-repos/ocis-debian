@@ -38,8 +38,6 @@ jobs:
             ocis_${{ env.OCIS_VERSION }}.orig.tar.gz
             ocis_${{ env.OCIS_VERSION }}-1.debian.tar.gz
             ocis_${{ env.OCIS_VERSION }}-1.dsc
-            ocis_${{ env.OCIS_VERSION }}-1_amd64.buildinfo
-            ocis_${{ env.OCIS_VERSION }}-1_amd64.changes
             ocis_${{ env.OCIS_VERSION }}-1_amd64.deb
             ocis-dbgsym_${{ env.OCIS_VERSION }}-1_amd64.ddeb
             ocis-common_${{ env.OCIS_VERSION }}-1_all.deb
@@ -74,8 +72,6 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: |
-            ocis_${{ env.OCIS_VERSION }}-1_arm64.buildinfo
-            ocis_${{ env.OCIS_VERSION }}-1_arm64.changes
             ocis_${{ env.OCIS_VERSION }}-1_arm64.deb
             ocis-dbgsym_${{ env.OCIS_VERSION }}-1_arm64.ddeb
  #  build_i386:
@@ -110,8 +106,6 @@ jobs:
  #        if: github.ref_type == 'tag'
  #        with:
  #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_i386.buildinfo
- #            ocis_${{ env.OCIS_VERSION }}-1_i386.changes
  #            ocis_${{ env.OCIS_VERSION }}-1_i386.deb
  #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_i386.deb
  #  build_armhf:
@@ -147,8 +141,6 @@ jobs:
  #        if: github.ref_type == 'tag'
  #        with:
  #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_armhf.buildinfo
- #            ocis_${{ env.OCIS_VERSION }}-1_armhf.changes
  #            ocis_${{ env.OCIS_VERSION }}-1_armhf.deb
  #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_armhf.deb
  # build_armel: # lacking gcc
@@ -184,8 +176,6 @@ jobs:
  #       if: github.ref_type == 'tag'
  #       with:
  #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_armel.buildinfo
- #           ocis_${{ env.OCIS_VERSION }}-1_armel.changes
  #           ocis_${{ env.OCIS_VERSION }}-1_armel.deb
  #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_armel.deb
  # build_loong64: # lacking gcc
@@ -220,8 +210,6 @@ jobs:
  #       if: github.ref_type == 'tag'
  #       with:
  #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_loong64.buildinfo
- #           ocis_${{ env.OCIS_VERSION }}-1_loong64.changes
  #           ocis_${{ env.OCIS_VERSION }}-1_loong64.deb
  #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_loong64.deb
  # build_mips64el: # lacking gcc
@@ -257,8 +245,6 @@ jobs:
  #       if: github.ref_type == 'tag'
  #       with:
  #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_mips64el.buildinfo
- #           ocis_${{ env.OCIS_VERSION }}-1_mips64el.changes
  #           ocis_${{ env.OCIS_VERSION }}-1_mips64el.deb
  #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_mips64el.deb
  # build_mipsel: # lacking gcc
@@ -294,8 +280,6 @@ jobs:
  #       if: github.ref_type == 'tag'
  #       with:
  #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_mipsel.buildinfo
- #           ocis_${{ env.OCIS_VERSION }}-1_mipsel.changes
  #           ocis_${{ env.OCIS_VERSION }}-1_mipsel.deb
  #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_mipsel.deb
  #  build_ppc64el:
@@ -330,8 +314,6 @@ jobs:
  #        if: github.ref_type == 'tag'
  #        with:
  #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_ppc64el.buildinfo
- #            ocis_${{ env.OCIS_VERSION }}-1_ppc64el.changes
  #            ocis_${{ env.OCIS_VERSION }}-1_ppc64el.deb
  #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_ppc64el.deb
  # build_ppc64: # lacking gcc
@@ -367,8 +349,6 @@ jobs:
  #       if: github.ref_type == 'tag'
  #       with:
  #         files: |
- #           ocis_${{ env.OCIS_VERSION }}-1_ppc64.buildinfo
- #           ocis_${{ env.OCIS_VERSION }}-1_ppc64.changes
  #           ocis_${{ env.OCIS_VERSION }}-1_ppc64.deb
  #           ocis-dbgsym_${{ env.OCIS_VERSION }}-1_ppc64.deb
  #  build_riscv64:
@@ -403,8 +383,6 @@ jobs:
  #        if: github.ref_type == 'tag'
  #        with:
  #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_riscv64.buildinfo
- #            ocis_${{ env.OCIS_VERSION }}-1_riscv64.changes
  #            ocis_${{ env.OCIS_VERSION }}-1_riscv64.deb
  #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_riscv64.deb
  #  build_s390x:
@@ -439,7 +417,5 @@ jobs:
  #        if: github.ref_type == 'tag'
  #        with:
  #          files: |
- #            ocis_${{ env.OCIS_VERSION }}-1_s390x.buildinfo
- #            ocis_${{ env.OCIS_VERSION }}-1_s390x.changes
  #            ocis_${{ env.OCIS_VERSION }}-1_s390x.deb
  #            ocis-dbgsym_${{ env.OCIS_VERSION }}-1_s390x.deb
