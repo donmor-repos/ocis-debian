@@ -1,0 +1,66 @@
+fix web timestamp
+--- a/web/index.html
++++ b/web/index.html
+@@ -12,11 +12,11 @@
+     <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+     <script>
+       if (typeof requirejs === 'undefined') {
+-        document.write('<script src="js/require.js?<%= data.compilationTimestamp %>">\x3C/script>')
++        document.write('<script src="js/require.js?<%= data.distTimestamp %>">\x3C/script>')
+       }
+     </script>
+     <% } else { %>
+-    <script src="js/require.js?<%= data.compilationTimestamp %>"></script>
++    <script src="js/require.js?<%= data.distTimestamp %>"></script>
+     <% } %>
+     <script type="module" src="./packages/web-runtime/src/index.ts"></script>
+     <script type="module">
+--- a/web/vite.config.ts
++++ b/web/vite.config.ts
+@@ -24,6 +24,7 @@ import { getUserAgentRegex } from 'browserslist-useragent-regexp'
+ import browserslistToEsbuild from 'browserslist-to-esbuild'
+ import fetch from 'node-fetch'
+ import { Agent } from 'https'
++import { execSync } from 'child_process'
+ 
+ // @ts-ignore
+ import ejs from 'ejs'
+@@ -85,6 +86,29 @@ const getConfigJson = async (url: string) => {
+   return (await getJson(url)) as ConfigJsonResponseBody
+ }
+ 
++const getDistTime = () => {
++  const epoch = process.env.SOURCE_DATE_EPOCH
++  if (epoch) {
++    const num = Number(epoch)
++    if (!isNaN(num) && num > 0) {
++      return new Date(num * 1000).getTime()
++    }
++  }
++  try {
++    const stdout = execSync('git log -1 --format=%ct', {
++      cwd: '..',
++      stdio: ['ignore', 'pipe', 'inherit'],
++      encoding: 'utf-8'
++    });
++    const num = parseInt(stdout.trim(), 10)
++    if (!isNaN(num) && num > 0) {
++      return new Date(num * 1000).getTime()
++    }
++  } catch {
++  }
++  return new Date().getTime()
++}
++
+ export const historyModePlugins = () =>
+   [
+     {
+@@ -297,7 +321,7 @@ export default defineConfig(({ mode, command }) => {
+                   buildConfig,
+ 
+                   title: process.env.TITLE || 'ownCloud',
+-                  compilationTimestamp: new Date().getTime(),
++                  distTimestamp: getDistTime(),
+                   supportedBrowsersRegex: supportedBrowsersRegex
+                 }
+               })

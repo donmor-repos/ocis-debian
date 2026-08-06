@@ -14,25 +14,31 @@
 # Package maintainers to append LDFLAGS.
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
+include /usr/share/dpkg/pkg-info.mk
+
 export GOPROXY ?= direct
 export GO111MODULE := on
 
 export DRONE_TAG != dpkg-parsechangelog --show-field Version | sed 's|-1||g'
 
+export CGO_ENABLED := 1
 export CGO_LDFLAGS := $(LDFLAGS)
-export CGO_CPPFLAGS := $(CPPFLAGS)
-export CGO_CFLAGS := $(CFLAGS)
-export CGO_CXXFLAGS := $(CXXFLAGS)
-export GOFLAGS := -buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw
+export CGO_CPPFLAGS := $(CPPFLAGS) -fdebug-prefix-map=$(CURDIR)=. -ffile-prefix-map=$(CURDIR)=. -fno-ident -fno-guess-branch-probability
+export CGO_CFLAGS := $(CFLAGS) -fdebug-prefix-map=$(CURDIR)=. -ffile-prefix-map=$(CURDIR)=. -fno-ident -fno-guess-branch-probability
+export CGO_CXXFLAGS := $(CXXFLAGS) -fdebug-prefix-map=$(CURDIR)=. -ffile-prefix-map=$(CURDIR)=. -fno-ident -fno-guess-branch-probability
+export GOFLAGS := -buildmode=pie -trimpath -mod=vendor -modcacherw -buildvcs=false
+export GOLDFLAGS := -linkmode=external
 export NODE_PATH := /tmp/.node
 export PATH := $(PATH):$(NODE_PATH)/node_modules/.bin
+export VERSION := $(DEB_VERSION_UPSTREAM)
+export DATE := $(shell date -d @$(SOURCE_DATE_EPOCH) +%Y%m%d)
 
 %:
 	dh $@
 
 override_dh_auto_build:
 	dh_auto_build -Docis -- ci-node-generate
-	dh_auto_build -Docis -- ci-go-generate build
+	dh_auto_build -Docis -- ci-go-generate build prefix=/usr
 
 override_dh_auto_test:
 
@@ -59,6 +65,8 @@ override_dh_strip:
 override_dh_dwz:
 	dh_dwz -a
 
+override_dh_shlibdeps:
+	dh_shlibdeps -l/usr/$(DEB_HOST_GNU_TYPE)/lib
 # dh_make generated override targets.
 # This is an example for Cmake (see <https://bugs.debian.org/641051>).
 #override_dh_auto_configure:

@@ -1,3 +1,71 @@
+ocis (8.2.0-1) unstable; urgency=medium
+
+  * Security - Do not leak internal error details in webdav error responses:
+    #12398
+  * Security - Make OIDC group sync opt-in: #12490
+  * Security - Block password and account changes via PATCH /graph/v1.0/me: #12493
+  * Bugfix - Always set an audit action for share updates: #7661
+  * Bugfix - Fix the proxy readiness check for NATS: #10661
+  * Bugfix - Honor $select=actions on the drive item permissions endpoint: #10816
+  * Bugfix - Keep group memberships when the OIDC groups claim is absent: #11435
+  * Bugfix - Pass the space ID when purging revision blobs: #11644
+  * Bugfix - Return 404 when deleting a non-existing link share on a space: #12266
+  * Bugfix - Fix PostgreSQL container restart loop in Keycloak deployments: #12359
+  * Bugfix - Prevent panic in presigned URL auth when signing key is missing:
+    #12384
+  * Bugfix - Fix double HTML-escaping of notification emails for multiple
+    recipients: #12413
+  * Bugfix - Re-verify access tokens with an expired userinfo cache entry: #12414
+  * Bugfix - Keep shares visible in sharedWithMe when a resource cannot be
+    statted: #12430
+  * Bugfix - Ensure the redirect URI for the IDP is valid: #12444
+  * Bugfix - The auth-app will create the user's home if needed: #12457
+  * Bugfix - Fix the empty mount ID for reva config: #12492
+  * Bugfix - Rate-limit the exportPersonalData endpoint: #12516
+  * Bugfix - Apply the role allowlist on permission updates: #12540
+  * Bugfix - Restore hover feedback in high-contrast and dark themes: #12613
+  * Bugfix - Preserve accessibility focus in the file versions sidebar: #12630
+  * Bugfix - Fix low-contrast form controls in dark and vault themes: #12639
+  * Bugfix - Stop breadcrumb items from being announced twice: #12643
+  * Bugfix - Remove unneeded keyboard focus stops: #12645
+  * Bugfix - Fix keyboard navigation in "New" and "Upload" dropdown menus: #12646
+  * Bugfix - Announce IDP sign-in errors and fix keyboard use: #12649
+  * Bugfix - Show vault-shared mountpoints in the vault drive list: #12656
+  * Bugfix - Prevent deleting your own account in the user management: #12661
+  * Bugfix - Log unmapped thumbnail errors and always report a sabredav exception:
+    #12667
+  * Bugfix - Fix concurrent map access when listing shares: #12673
+  * Bugfix - Keep bind config in sync when resetting a service user password:
+    #12716
+  * Bugfix - Allow renaming, moving and editing files with the editor-lite role:
+    #12721
+  * Bugfix - Fix invisible group icon in share collaborator list: #12722
+  * Bugfix - Return correct issuerAssignedId on /me: #12727
+  * Bugfix - Vault navigation labels not updating on switch: #12729
+  * Bugfix - Do not collide vault and non-vault share mountpoints: #12730
+  * Bugfix - Remove keyboard focus from open file name in top bar: #12752
+  * Enhancement - Replace embedded IDP React SPA with server-rendered login page:
+    #12086
+  * Enhancement - Add ocis shares clean-corrupt-public-shares maintenance command:
+    #12494
+  * Enhancement - Harden OCM create share: #12496
+  * Enhancement - Clean up the deployment examples: #12521
+  * Enhancement - Allow disabling the last sign-in timestamp update: #12522
+  * Enhancement - Add configurable software license and help page links: #12528
+  * Enhancement - Configurable logo click-through URL: #12529
+  * Enhancement - Add option to disable public link sharing: #12542
+  * Enhancement - Add option to disable direct (user/group) sharing: #12542
+  * Enhancement - Add audience restriction for OIDC access tokens: #12581
+  * Enhancement - Eliminate redundant LDAP read-after-write on create and update:
+    #12618
+  * Enhancement - Improve page structure on several pages: #12637
+  * Enhancement - Show the select-all checkbox label in tile view: #12640
+  * Enhancement - Retry LDAP operations against a lagging replica: #12672
+  * Enhancement - Add an opt-in bounded LDAP connection pool: #12688
+  * Enhancement - Bump dependencies: #12766
+
+ -- donmor <donmor3000@hotmail.com>  Mon, 10 Aug 2026 18:03:50 +0000
+
 ocis (8.0.7-1) unstable; urgency=medium
 
   * Bugfix - Return correct issuerAssignedId on /me: #12635

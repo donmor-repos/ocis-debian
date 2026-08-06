@@ -1,31 +1,40 @@
 fix makefiles
 --- a/.make/go.mk
 +++ b/.make/go.mk
-@@ -87,7 +87,7 @@
+@@ -36,7 +36,7 @@
+ 	DATE := $(shell date -u '+%Y%m%d')
+ endif
+ 
+-LDFLAGS += -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn -s -w -X "$(OCIS_REPO)/ocis-pkg/version.String=$(STRING)" -X "$(OCIS_REPO)/ocis-pkg/version.Tag=$(VERSION)" -X "$(OCIS_REPO)/ocis-pkg/version.Date=$(DATE)"
++GOLDFLAGS += -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn -X "$(OCIS_REPO)/ocis-pkg/version.String=$(STRING)" -X "$(OCIS_REPO)/ocis-pkg/version.Tag=$(VERSION)" -X "$(OCIS_REPO)/ocis-pkg/version.Date=$(DATE)"
+ DEBUG_LDFLAGS += -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn -X "$(OCIS_REPO)/ocis-pkg/version.String=$(STRING)" -X "$(OCIS_REPO)/ocis-pkg/version.Tag=$(VERSION)" -X "$(OCIS_REPO)/ocis-pkg/version.Date=$(DATE)"
+ 
+ GCFLAGS += all=-N -l
+@@ -86,7 +86,7 @@
  
  .PHONY: install
  install: $(SOURCES)
 -	go install -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./cmd/$(NAME)
-+	go install -v -tags '$(TAGS)' ./cmd/$(NAME)
++	go install -v -tags '$(TAGS)' -ldflags '$(GOLDFLAGS)' ./cmd/$(NAME)
  
  .PHONY: build-all
  build-all: build build-debug
-@@ -99,7 +99,7 @@
+@@ -98,7 +98,7 @@
  build-debug: $(BIN)/$(EXECUTABLE)-debug
  
  $(BIN)/$(EXECUTABLE): $(SOURCES)
 -	$(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-+	$(GOBUILD) -v -tags '$(TAGS)' -o $@ ./cmd/$(NAME)
++	$(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(GOLDFLAGS)' -o $@ ./cmd/$(NAME)
  
  $(BIN)/$(EXECUTABLE)-debug: $(SOURCES)
  	$(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(DEBUG_LDFLAGS)' -cover -gcflags '$(GCFLAGS)' -o $@ ./cmd/$(NAME)
 --- a/services/web/Makefile
 +++ b/services/web/Makefile
-@@ -32,7 +32,6 @@
- 
- .PHONY: pull-assets
- pull-assets:
+@@ -34,7 +34,6 @@
+ build-assets:
+ 	cd $(WEB_DIR) && pnpm install && pnpm check:types && pnpm build
+ 	cp $(WEB_DIR)/config/config.json.dist $(WEB_DIR)/dist/
 -	git clean -xfd assets
- 	curl --fail -slL -o- https://github.com/owncloud/web/releases/download/$(WEB_ASSETS_VERSION)/web.tar.gz | tar xzf - -C assets/core/
+ 	cp -r $(WEB_DIR)/dist/. assets/core/
  
  ############ licenses ############

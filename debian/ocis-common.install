@@ -1,1 +1,3 @@
 debian/ocis.env etc
+services/web/assets/apps usr/share/ocis/web/assets
+services/web/assets/core usr/share/ocis/web/assets

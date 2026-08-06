@@ -1,0 +1,56 @@
+fix ext web assets
+--- a/.make/go.mk
++++ b/.make/go.mk
+@@ -39,6 +39,10 @@
+ GOLDFLAGS += -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn -X "$(OCIS_REPO)/ocis-pkg/version.String=$(STRING)" -X "$(OCIS_REPO)/ocis-pkg/version.Tag=$(VERSION)" -X "$(OCIS_REPO)/ocis-pkg/version.Date=$(DATE)"
+ DEBUG_LDFLAGS += -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn -X "$(OCIS_REPO)/ocis-pkg/version.String=$(STRING)" -X "$(OCIS_REPO)/ocis-pkg/version.Tag=$(VERSION)" -X "$(OCIS_REPO)/ocis-pkg/version.Date=$(DATE)"
+ 
++ifdef prefix
++	GOLDFLAGS += -X "$(OCIS_REPO)/ocis-pkg/config/defaults.UnixPrefix=$(prefix)"
++endif
++
+ GCFLAGS += all=-N -l
+ 
+ .PHONY: all
+--- a/ocis-pkg/config/defaults/paths.go
++++ b/ocis-pkg/config/defaults/paths.go
+@@ -8,6 +8,8 @@
+ 
+ const ()
+ 
++var UnixPrefix = "/usr/local"
++
+ var (
+ 	// switch between modes
+ 	BaseDataPathType = "homedir" // or "path"
+--- a/services/web/pkg/config/defaults/defaultconfig.go
++++ b/services/web/pkg/config/defaults/defaultconfig.go
+@@ -80,9 +80,9 @@
+ 			Name: "web",
+ 		},
+ 		Asset: config.Asset{
+-			CorePath:   filepath.Join(defaults.BaseDataPath(), "web/assets/core"),
+-			AppsPath:   filepath.Join(defaults.BaseDataPath(), "web/assets/apps"),
+-			ThemesPath: filepath.Join(defaults.BaseDataPath(), "web/assets/themes"),
++			CorePath:   filepath.Join(defaults.UnixPrefix, "share/ocis", "web/assets/core"),
++			AppsPath:   filepath.Join(defaults.UnixPrefix, "share/ocis", "web/assets/apps"),
++			ThemesPath: filepath.Join(defaults.UnixPrefix, "share/ocis", "web/assets/themes"),
+ 		},
+ 		GatewayAddress: "com.owncloud.api.gateway",
+ 		Web: config.Web{
+--- a/services/web/web.go
++++ b/services/web/web.go
+@@ -1,10 +1,10 @@
+ package web
+ 
+ import (
+-	"embed"
++	"io/fs"
++	"testing/fstest"
+ )
+ 
+ //go:generate make generate
+ 
+-//go:embed all:assets
+-var Assets embed.FS
++var Assets fs.FS = fstest.MapFS{}
