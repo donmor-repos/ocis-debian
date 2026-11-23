@@ -2,7 +2,6 @@
 
 # Get info
 node_req=`jq -r '.engines.node' web/package.json | sed 's/[>,=]//g'`
-if [ -z "$node_req" ]; then web_req=`grep -E '^WEB_ASSETS_VERSION' services/web/Makefile | cut -d ' ' -f 3`; node_req=`curl https://raw.githubusercontent.com/owncloud/web/refs/tags/$web_req/package.json | jq -r '.engines.node' | sed 's/[>,=]//g'`; fi
 go_req=`grep '^go [0-9.]\+$' go.mod | grep -o '[0-9.]\+' | awk -F. '{print $1"."$2"."($3+0)}'`
 go_pkg=`curl -sL "https://go.dev/dl/?mode=json&include=all" | jq -r --arg major ${go_req} --arg arch ${GOHOSTARCH}  'first(.[] | select(.version | contains($major))) | .files[] | select(.os == "linux" and .arch == $arch) | .filename'`
 C_ARCH=`echo ${C_ARCH} | sed 's/_/-/'`

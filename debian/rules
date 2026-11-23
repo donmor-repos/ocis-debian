@@ -32,7 +32,7 @@ export VERSION := $(DEB_VERSION_UPSTREAM)
 export DATE := $(shell date -d @$(SOURCE_DATE_EPOCH) +%Y%m%d)
 
 NODE_PATH := /tmp/.node
-NPM_PM := $(shell jq -r '.packageManager')
+NPM_PM := $(shell jq -r '.packageManager' web/package.json)
 export PATH := $(PATH):$(NODE_PATH)/node_modules/.bin
 
 %:
@@ -40,7 +40,7 @@ export PATH := $(PATH):$(NODE_PATH)/node_modules/.bin
 
 override_dh_auto_clean:
 	$(DH_OVERRIDDEN_COMMAND)
-	if [ -d web ]; then cd web; rm -rf dist node_modules packages/*/node_modules tests/e2e/node_modules packages/design-system/src/assets/tokens $(NODE_PATH); fi
+	cd web && rm -rf dist node_modules packages/*/node_modules tests/e2e/node_modules packages/design-system/src/assets/tokens $(NODE_PATH)
 
 override_dh_auto_build:
 	dh_auto_build -Docis -- ci-node-generate
