@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     # runs-on: ${{ matrix.config.host }}
     container:
-      image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+      image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
       # image: ${{ matrix.config.host_image }}
     strategy:
       matrix:
@@ -44,21 +44,21 @@ jobs:
             go_arch: amd64
             go_host_arch: amd64
             host: ubuntu-24.04
-            host_image: debian@sha256:38a76d01668772e381ad2826d876627c89e7133e2f8a0f5d567306798b0f2a16
+            host_image: debian@sha256:471f7ac462dc3340a91773a376acebe4dd4f6414a7a6b29d2dbcfe768341ca76
           - d_arch: arm64
             c_arch: aarch64-linux-gnu
             h_arch: arm64
             go_arch: arm64
             go_host_arch: arm64
             host: ubuntu-24.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
           # - d_arch: i386 #        Not reproducible
           #   c_arch: i686-linux-gnu
           #   h_arch: amd64
           #   go_arch: 386
           #   go_host_arch: amd64
           #   host: ubuntu-24.04
-          #   host_image: debian@sha256:38a76d01668772e381ad2826d876627c89e7133e2f8a0f5d567306798b0f2a16
+          #   host_image: debian@sha256:471f7ac462dc3340a91773a376acebe4dd4f6414a7a6b29d2dbcfe768341ca76
           - d_arch: armhf
             c_arch: arm-linux-gnueabihf
             h_arch: arm64
@@ -66,7 +66,7 @@ jobs:
             go_host_arch: arm64
             go_arm: 7
             host: ubuntu-24.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
           - d_arch: armel
             c_arch: arm-linux-gnueabi
             h_arch: arm64
@@ -74,41 +74,76 @@ jobs:
             go_host_arch: arm64
             go_arm: 5
             host: ubuntu-24.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
           - d_arch: loong64
             c_arch: loongarch64-linux-gnu
             h_arch: arm64
             go_arch: loong64
             go_host_arch: arm64
             host: ubuntu-26.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
+          # - d_arch: mips64el #        No pie
+          #   c_arch: mips64el-linux-gnuabi64
+          #   h_arch: arm64
+          #   go_arch: mips64le
+          #   go_host_arch: arm64
+          #   host: ubuntu-26.04-arm
+          #   host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
+          # - d_arch: mipsel #        No pie
+          #   c_arch: mipsel-linux-gnu
+          #   h_arch: arm64
+          #   go_arch: mipsle
+          #   go_host_arch: arm64
+          #   host: ubuntu-26.04-arm
+          #   host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
+          # - d_arch: mips64 #        No pie
+          #   c_arch: mips64-linux-gnuabi64
+          #   h_arch: arm64
+          #   go_arch: mips64
+          #   go_host_arch: arm64
+          #   host: ubuntu-26.04-arm
+          #   host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
+          # - d_arch: mips #        No pie
+          #   c_arch: mips-linux-gnu
+          #   h_arch: arm64
+          #   go_arch: mips
+          #   go_host_arch: arm64
+          #   host: ubuntu-26.04-arm
+          #   host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
           - d_arch: ppc64el
             c_arch: powerpc64le-linux-gnu
             h_arch: arm64
             go_arch: ppc64le
             go_host_arch: arm64
             host: ubuntu-24.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
+          # - d_arch: ppc64 #        No arm64 cross toolchain
+          #   c_arch: powerpc64-linux-gnu
+          #   h_arch: amd64
+          #   go_arch: ppc64
+          #   go_host_arch: amd64
+          #   host: ubuntu-24.04
+          #   host_image: debian@sha256:471f7ac462dc3340a91773a376acebe4dd4f6414a7a6b29d2dbcfe768341ca76
           - d_arch: riscv64
             c_arch: riscv64-linux-gnu
             h_arch: arm64
             go_arch: riscv64
             go_host_arch: arm64
             host: ubuntu-24.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
           - d_arch: s390x
             c_arch: s390x-linux-gnu
             h_arch: arm64
             go_arch: s390x
             go_host_arch: arm64
             host: ubuntu-24.04-arm
-            host_image: debian@sha256:c94f5ddd41327aa2d4a7cfba7889056c02936182fd76a513fec6160c97181fc0
+            host_image: debian@sha256:ab26c892d1ff29cc108c9f6908979aeed5ac64514c6ceda1d64ab41176eeb620
     needs: version
     steps:
       - name: Prepare source and build scripts
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl jq gpg
+          apt-get install -y --no-install-recommends ca-certificates curl jq gpg lsb-release
           curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -o ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz \
               https://github.com/owncloud/ocis/archive/refs/tags/${{ needs.version.outputs.ref }}.tar.gz
           tar xvf ocis_${{ needs.version.outputs.ocis }}.orig.tar.gz
@@ -185,14 +220,14 @@ jobs:
         with:
           tag: ${{ steps.previous.outputs.ref }}
           out-file-path: download/${{ needs.version.outputs.ref }}
-          fileName: 'Packages.gz'
+          fileName: 'Packages'
       - name: Download previous Sources (if exists)
         uses: robinraju/release-downloader@v1
         continue-on-error: true
         with:
           tag: ${{ steps.previous.outputs.ref }}
           out-file-path: download/${{ needs.version.outputs.ref }}
-          fileName: 'Sources.gz'
+          fileName: 'Sources'
       - name: Download artifacts from build jobs
         uses: actions/download-artifact@v8
         with:
@@ -201,14 +236,10 @@ jobs:
       - name: Generate Packages, Sources, and InRelease
         working-directory: download/${{ needs.version.outputs.ref }}
         run: |
-          gzip -d Packages.gz
-          gzip -d Sources.gz
           apt-ftparchive packages ../../download/${{ needs.version.outputs.ref }} | sort-dctrl -k Package,Architecture | tee -a Packages
           apt-ftparchive sources ../../download/${{ needs.version.outputs.ref }} | tee -a Sources
           sort-dctrl -k Version:v,Package,Architecture Packages | sponge Packages
           sort-dctrl -k Version:v Sources | sponge Sources
-          gzip -n -9 Packages
-          gzip -n -9 Sources
           echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
           PUB=`curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               "https://api.github.com/repos/owncloud/ocis/releases/tags/${{ needs.version.outputs.ref }}" | jq -r ".published_at" | date -u -R -f -`
@@ -221,7 +252,7 @@ jobs:
           retention-days: 1
           path: download/${{ needs.version.outputs.ref }}/**
       - name: Upload all files to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
           files: download/${{ needs.version.outputs.ref }}/**

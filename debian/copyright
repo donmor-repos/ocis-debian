@@ -5,7 +5,7 @@ Upstream-Name: ocis
 Files:
  *
 Copyright:
- 201-2025 owncloud
+ 2020-2025 owncloud
 License: Apache-2.0
 
 # If you want to use GPL v2 or later for the /debian/* files use

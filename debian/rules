@@ -28,13 +28,19 @@ export CGO_CFLAGS := $(CFLAGS) -fdebug-prefix-map=$(CURDIR)=. -ffile-prefix-map=
 export CGO_CXXFLAGS := $(CXXFLAGS) -fdebug-prefix-map=$(CURDIR)=. -ffile-prefix-map=$(CURDIR)=. -fno-ident -fno-guess-branch-probability
 export GOFLAGS := -buildmode=pie -trimpath -mod=vendor -modcacherw -buildvcs=false
 export GOLDFLAGS := -linkmode=external
-export NODE_PATH := /tmp/.node
-export PATH := $(PATH):$(NODE_PATH)/node_modules/.bin
 export VERSION := $(DEB_VERSION_UPSTREAM)
 export DATE := $(shell date -d @$(SOURCE_DATE_EPOCH) +%Y%m%d)
 
+NODE_PATH := /tmp/.node
+NPM_PM := $(shell jq -r '.packageManager')
+export PATH := $(PATH):$(NODE_PATH)/node_modules/.bin
+
 %:
 	dh $@
+
+override_dh_auto_clean:
+	$(DH_OVERRIDDEN_COMMAND)
+	if [ -d web ]; then cd web; rm -rf dist node_modules packages/*/node_modules tests/e2e/node_modules packages/design-system/src/assets/tokens $(NODE_PATH); fi
 
 override_dh_auto_build:
 	dh_auto_build -Docis -- ci-node-generate
@@ -55,7 +61,7 @@ override_dh_installsysusers:
 
 execute_before_dh_auto_build:
 	mkdir -p $(NODE_PATH)
-	npm --prefix=$(NODE_PATH) install pnpm@latest-10
+	npm --prefix=$(NODE_PATH) install $(NPM_PM)
 
 # Fix strip error
 .IGNORE: override_dh_strip

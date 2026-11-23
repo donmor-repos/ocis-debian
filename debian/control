@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: donmor <donmor3000@hotmail.com>
 Rules-Requires-Root: no
 Build-Depends:
- debhelper-compat (= 13), golang-go:native (>= 2:1.24~1), nodejs:native (>= 18), npm
+ debhelper-compat (= 14), golang-go:native (>= 2:1.25.13~1), nodejs:native (>= 18), npm, jq
 Standards-Version: 4.7.2
 Homepage: https://github.com/owncloud/ocis
 #Vcs-Browser: https://salsa.debian.org/debian/ocis
@@ -23,7 +23,6 @@ Description: ownCloud Infinite Scale
 Package: ocis-common
 Architecture: all
 Depends:
- ${shlibs:Depends},
  ${misc:Depends},
  ocis (= ${source:Version}),
 Description: ownCloud Infinite Scale - common files
