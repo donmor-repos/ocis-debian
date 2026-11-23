@@ -1,3 +1,15 @@
+ocis (8.2.2-1) unstable; urgency=medium
+
+  * Security - Bump vulnerable dependencies: #13080
+  * Security - Bump vulnerable web dependencies: #13210
+  * Bugfix - Fix AuthApp and basic auth requests with custom
+    PROXY_USER_OIDC_CLAIM: #13078
+  * Bugfix - Fix the LDAP master-ID filter when the base filter is empty: #13096
+  * Bugfix - Keep /me working when the preferred language lookup fails: #13188
+  * Enhancement - Allow ownCloud Marketplace in ocis_multi CSP: #13090
+
+ -- donmor <donmor3000@hotmail.com>  Wed, 21 Oct 2026 10:09:21 +0000
+
 ocis (8.2.1-1) unstable; urgency=medium
 
   * Security - Bump golang.org/x/image to v0.45.0: #12806
