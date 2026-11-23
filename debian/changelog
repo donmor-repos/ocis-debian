@@ -1,3 +1,12 @@
+ocis (8.2.3-1) unstable; urgency=medium
+
+  * Security - Bump vulnerable dependencies: #13300
+  * Bugfix - Fix the data race on the web theme defaults: #13251
+  * Change - Deprecate the owncloudsql environment variables: #13193
+  * Change - Deprecate the posixfs environment variables: #13302
+
+ -- donmor <donmor3000@hotmail.com>  Fri, 06 Nov 2026 14:01:12 +0000
+
 ocis (8.2.2-1) unstable; urgency=medium
 
   * Security - Bump vulnerable dependencies: #13080
