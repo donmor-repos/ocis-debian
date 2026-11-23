@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: donmor <donmor3000@hotmail.com>
 Rules-Requires-Root: no
 Build-Depends:
- debhelper-compat (= 14), golang-go:native (>= 2:1.25.13~1), nodejs:native (>= 18), npm, jq
+ debhelper-compat (= 14), golang-go:native (>= 2:1.26.10~1), nodejs:native (>= 18), npm, jq
 Standards-Version: 4.7.2
 Homepage: https://github.com/owncloud/ocis
 #Vcs-Browser: https://salsa.debian.org/debian/ocis

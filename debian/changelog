@@ -1,3 +1,15 @@
+ocis (8.0.10-1) unstable; urgency=medium
+
+  * Security - Mask secret values in the proxy debug output: #13220
+  * Security - Bump go-jose and ignore CVE-2026-116587 for go-jose/v3: #13342
+  * Security - Bump idp frontend dependencies: #13345
+  * Bugfix - Skip a not-ready node before reusing a cached grpc client: #13147
+  * Bugfix - Disable the persistence of the gateway provider cache: #13220
+  * Enhancement - Bump Reva version: #13152
+  * Enhancement - Add NATS JWT authentication with a .creds file: #13220
+
+ -- donmor <donmor3000@hotmail.com>  Wed, 04 Nov 2026 17:13:20 +0000
+
 ocis (8.0.9-1) unstable; urgency=medium
 
   * Security - Bump grpc-go dependency: #13020
