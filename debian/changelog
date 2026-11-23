@@ -1,3 +1,30 @@
+ocis (8.0.11-1) unstable; urgency=medium
+
+  * Security - Fix signing-key to public share guests: #12332
+  * Security - Do not leak internal error details in webdav error responses:
+    #12398
+  * Security - Harden public link brute force protection: #12944
+  * Security - Enforce sharing permissions when updating links: #13447
+  * Bugfix - Rate-limit the exportPersonalData endpoint: #12516
+  * Bugfix - Apply the role allowlist on permission updates: #12540
+  * Bugfix - Use a dedicated ICAP client per scan: #13386
+  * Bugfix - Turn on the events TLS in the jsoncs3 share manager and in OCM:
+    #13442
+  * Bugfix - Fix slow builds with GNU Make 4.4: #13454
+  * Bugfix - Remove stale group shares in the share manager: #13460
+  * Bugfix - Filter spurious TLS handshake errors from CI test runner output:
+    #13499
+  * Bugfix - Wait for app registry before running WOPI cs3 validator tests: #13504
+  * Bugfix - Reuse HTTP connections in the proxy and in the metadata client:
+    #13539
+  * Enhancement - Harden the Collabora deployment examples: #13389
+  * Enhancement - Bump Web to 12.3.4: #13402
+  * Enhancement - Update Mockery to 2.53.8: #13454
+  * Enhancement - Bump Web to 12.3.5: #13487
+  * Enhancement - Bump Web to 12.3.6: #13521
+
+ -- donmor <donmor3000@hotmail.com>  Fri, 20 Nov 2026 14:46:34 +0000
+
 ocis (8.0.10-1) unstable; urgency=medium
 
   * Security - Mask secret values in the proxy debug output: #13220
